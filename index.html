@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LebihCakep · Riset Produk Harian</title>
+<style>
+  :root{
+    --bg:#0b0b0f; --card:#15151c; --card2:#1c1c26; --border:#2a2a36;
+    --text:#f2f2f5; --muted:#9a9aad; --accent:#ff7a1a; --accent2:#ffb703;
+    --green:#3ddc84; --red:#ff5c5c; --blue:#4da3ff;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;
+    background:radial-gradient(circle at top, #16161f, #0b0b0f 60%);
+    color:var(--text); min-height:100vh; padding-bottom:60px;
+  }
+  header{
+    padding:28px 20px 18px; position:sticky; top:0; z-index:10;
+    background:rgba(11,11,15,0.9); backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .h-row{display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:12px; max-width:1100px; margin:0 auto;}
+  h1{font-size:22px; margin:0 0 4px; letter-spacing:-0.3px;}
+  .sub{color:var(--muted); font-size:13px;}
+  .badge{
+    display:inline-flex; align-items:center; gap:6px; font-size:12px;
+    background:var(--card2); border:1px solid var(--border); padding:6px 12px;
+    border-radius:999px; color:var(--muted);
+  }
+  .badge b{color:var(--accent2);}
+  .stats{display:flex; gap:10px; flex-wrap:wrap; max-width:1100px; margin:16px auto 0;}
+  .stat{
+    background:var(--card); border:1px solid var(--border); border-radius:14px;
+    padding:12px 16px; min-width:120px; flex:1;
+  }
+  .stat .n{font-size:20px; font-weight:700;}
+  .stat .l{font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:.5px; margin-top:2px;}
+
+  .filters{
+    max-width:1100px; margin:20px auto 0; padding:0 20px; display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .chip{
+    background:var(--card2); border:1px solid var(--border); color:var(--muted);
+    padding:8px 16px; border-radius:999px; font-size:13px; cursor:pointer; user-select:none;
+    transition:.15s;
+  }
+  .chip:hover{border-color:var(--accent);}
+  .chip.active{background:var(--accent); color:#1a0e03; border-color:var(--accent); font-weight:600;}
+
+  main{max-width:1100px; margin:20px auto; padding:0 20px;}
+  .cat-section{margin-bottom:36px;}
+  .cat-title{
+    display:flex; align-items:center; gap:10px; margin:0 0 14px; font-size:16px;
+  }
+  .cat-title .dot{width:8px;height:8px;border-radius:50%; background:var(--accent);}
+  .cat-title .count{color:var(--muted); font-weight:400; font-size:13px;}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px;}
+  .card{
+    background:var(--card); border:1px solid var(--border); border-radius:16px;
+    padding:16px; cursor:pointer; transition:.18s; position:relative; overflow:hidden;
+  }
+  .card:hover{border-color:var(--accent); transform:translateY(-2px);}
+  .card::before{
+    content:''; position:absolute; top:0; left:0; right:0; height:3px;
+    background:linear-gradient(90deg,var(--accent),var(--accent2));
+    opacity:0; transition:.18s;
+  }
+  .card:hover::before{opacity:1;}
+  .card-top{display:flex; justify-content:space-between; align-items:flex-start; gap:8px; margin-bottom:10px;}
+  .p-name{font-size:14.5px; font-weight:600; line-height:1.35; margin:0;}
+  .tag{
+    font-size:10px; font-weight:700; padding:3px 8px; border-radius:6px; white-space:nowrap;
+    text-transform:uppercase; letter-spacing:.3px;
+  }
+  .tag.up{background:rgba(61,220,132,.15); color:var(--green);}
+  .tag.down{background:rgba(255,92,92,.15); color:var(--red);}
+  .p-meta{display:flex; justify-content:space-between; font-size:13px; color:var(--muted); margin-bottom:10px;}
+  .p-price{font-size:18px; font-weight:700; color:var(--accent2);}
+  .p-row{display:flex; justify-content:space-between; font-size:12.5px; padding:6px 0; border-top:1px solid var(--border);}
+  .p-row span:first-child{color:var(--muted);}
+  .p-row span:last-child{font-weight:600;}
+  .conv-bar-wrap{margin-top:10px;}
+  .conv-label{display:flex; justify-content:space-between; font-size:11px; color:var(--muted); margin-bottom:4px;}
+  .conv-bar{height:6px; background:var(--card2); border-radius:99px; overflow:hidden;}
+  .conv-fill{height:100%; background:linear-gradient(90deg,var(--blue),var(--green)); border-radius:99px;}
+  .usp-note{
+    margin-top:12px; font-size:12px; color:var(--muted); line-height:1.5;
+    background:var(--card2); padding:10px 12px; border-radius:10px; border-left:2px solid var(--accent);
+  }
+  .flag{
+    display:inline-block; font-size:10px; margin-top:8px; padding:3px 8px; border-radius:6px;
+    background:rgba(255,183,3,.12); color:var(--accent2); font-weight:600;
+  }
+
+  /* Modal */
+  .overlay{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:100;
+    align-items:center; justify-content:center; padding:20px;
+  }
+  .overlay.show{display:flex;}
+  .modal{
+    background:var(--card); border:1px solid var(--border); border-radius:18px;
+    max-width:480px; width:100%; padding:24px; max-height:85vh; overflow-y:auto;
+  }
+  .modal h2{margin:0 0 6px; font-size:19px;}
+  .modal .close{
+    float:right; background:var(--card2); border:1px solid var(--border); color:var(--text);
+    width:30px; height:30px; border-radius:50%; cursor:pointer; font-size:16px;
+  }
+  .modal-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; margin:16px 0;}
+  .mrow{background:var(--card2); padding:10px 12px; border-radius:10px;}
+  .mrow .l{font-size:10px; color:var(--muted); text-transform:uppercase;}
+  .mrow .v{font-size:15px; font-weight:700; margin-top:2px;}
+  .modal a.linkbtn{
+    display:block; text-align:center; background:var(--accent); color:#1a0e03; font-weight:700;
+    padding:12px; border-radius:10px; text-decoration:none; margin-top:14px;
+  }
+
+  footer{text-align:center; color:var(--muted); font-size:12px; margin-top:40px; padding:0 20px;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="h-row">
+    <div>
+      <h1>🔥 Riset Produk Harian — LebihCakep</h1>
+      <div class="sub">Sumber: Kalodata (30 hari terakhir, 24 Agu–22 Sep 2026) · Cross-check: Inventory Wardrobe</div>
+    </div>
+    <div class="badge">Test run · <b>23 Sep 2026</b></div>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="n" id="statTotal">9</div><div class="l">Produk ditemukan</div></div>
+    <div class="stat"><div class="n">5</div><div class="l">Kategori hari ini</div></div>
+    <div class="stat"><div class="n" style="color:var(--accent2)">0</div><div class="l">Match inventory (🔥)</div></div>
+    <div class="stat"><div class="n" style="color:var(--green)">6</div><div class="l">Growth positif/stabil</div></div>
+  </div>
+</header>
+
+<main>
+  <div class="filters" id="filters"></div>
+  <div id="catContainer"></div>
+</main>
+
+<footer>
+  Dibuat otomatis oleh Claude · Decision making tetap di tangan Naufal. Data komisi &amp; konversi diambil langsung dari Kalodata, bukan estimasi.
+</footer>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modalBody"></div>
+</div>
+
+<script>
+const data = [
+  {
+    cat: "Atasan Pria",
+    name: "PROMO PUNCAK!!!! [3+1 PREMIUM] Kaos Campur Motif Random",
+    seller: "Gudang Kaos Tangerang",
+    price: "Rp370.000",
+    commission: "7%",
+    growth: "+192%",
+    growthUp: true,
+    conv: 61.44,
+    revenue: "Rp4,5 M / 30hr",
+    link: "https://www.kalodata.com/product",
+    usp: "Bundle 3+1 kaos motif random — kuat di angle 'value bundling' & 'grafis kaos hits'. Rasio konversi kreator 61.44% (di atas rata-rata kategori), growth 30 hari +192%.",
+    flag: "Komisi 7% — sedikit di bawah standar minimal 8%, tapi growth & konversi sangat kuat, layak dipertimbangkan."
+  },
+  {
+    cat: "Atasan Pria",
+    name: "Screamous Kaos T-Shirt Regular Danbowl Zack",
+    seller: "Integrasi Data Tokopedia",
+    price: "Rp172.960 (avg)",
+    commission: "9%",
+    growth: "+66%",
+    growthUp: true,
+    conv: 28.57,
+    revenue: "Rp2,92 M / 30hr",
+    link: "https://www.kalodata.com/product",
+    usp: "Kaos graphic tee regular fit, cocok untuk angle streetwear/casual. Growth solid +66% dalam 30 hari, komisi di atas minimum.",
+    flag: null
+  },
+  {
+    cat: "Atasan Pria",
+    name: "Rompi Kompresi untuk Pria / Pembentuk Tubuh",
+    seller: "Ballerbro-style compression",
+    price: "Rp129.200 (avg)",
+    commission: "10%",
+    growth: "-7,1%",
+    growthUp: false,
+    conv: 47.72,
+    revenue: "Rp2,29 M / 30hr",
+    link: "https://www.kalodata.com/product",
+    usp: "Compression wear, angle fitness/gym-look. Growth sedikit turun tapi konversi kreator tinggi (47.72%) — masih ada demand nyata.",
+    flag: null
+  },
+  {
+    cat: "Bawahan Pria",
+    name: "Celana Jaksel Korean Style Skena",
+    seller: "Integrasi Data Tokopedia",
+    price: "Rp83.750 (avg)",
+    commission: "10%",
+    growth: "+8,2%",
+    growthUp: true,
+    conv: 49.36,
+    revenue: "Rp279,5 M / 30hr",
+    link: "https://www.kalodata.com/product",
+    usp: "Celana korean style, angle 'jaksel'/streetwear kasual. Growth positif, konversi kreator hampir 50% — salah satu kandidat terkuat hari ini.",
+    flag: null
+  },
+  {
+    cat: "Bawahan Pria",
+    name: "Celana Pendek Broadshort Chino Atas Lutut",
+    seller: "Integrasi Data Tokopedia",
+    price: "Rp41.440 - Rp60.320",
+    commission: "10%",
+    growth: "-62,6%",
+    growthUp: false,
+    conv: 43.59,
+    revenue: "Rp85,81 M / 30hr",
+    link: "https://www.kalodata.com/product",
+    usp: "Celana pendek casual harian, harga sangat terjangkau. Growth turun tajam bulan ini — perlu dicek lagi apakah masih tren sebelum diprioritaskan.",
+    flag: "Growth turun -62,6% — pantau ulang sebelum full produksi konten."
+  },
+  {
+    cat: "Jaket Pria",
+    name: "5 Brand Fashion Jaket (Curated Multi-brand)",
+    seller: "Integrasi Data Tokopedia",
+    price: "Rp112.160 (avg)",
+    commission: "9%",
+    growth: "+19,1%",
+    growthUp: true,
+    conv: 59.70,
+    revenue: "Rp32,75 M / 30hr",
+    link: "https://www.kalodata.com/product",
+    usp: "Kurasi jaket multi-brand, angle 'rekomendasi jaket favorit'. Growth positif + konversi kreator hampir 60% — kandidat kuat untuk konten jaket minggu ini.",
+    flag: null
+  },
+  {
+    cat: "Jaket Pria",
+    name: "Jaket Pria Terbaru / Jaket Outer",
+    seller: "Integrasi Data Tokopedia",
+    price: "Rp119.820 - Rp145.430",
+    commission: "9%",
+    growth: "-13,6%",
+    growthUp: false,
+    conv: 47.25,
+    revenue: "Rp122,5 M / 30hr",
+    link: "https://www.kalodata.com/product",
+    usp: "Jaket casual harian, sample size besar (821 penjualan). Growth sedikit turun tapi volume & konversi masih sehat.",
+    flag: null
+  },
+  {
+    cat: "Kacamata Pria",
+    name: "【COD】Kacamata Hitam Anti UV+ Mengemudi",
+    seller: "Integrasi Data Tokopedia",
+    price: "Rp23.900",
+    commission: "10%",
+    growth: ">999,9% 🚀",
+    growthUp: true,
+    conv: 72.31,
+    revenue: "Rp42,12 M / 30hr",
+    link: "https://www.kalodata.com/product",
+    usp: "Kacamata hitam anti UV untuk berkendara, harga sangat terjangkau, lagi viral (growth di atas 999%). Konversi kreator 72.31% — salah satu produk terbaik hari ini secara keseluruhan.",
+    flag: "🔥 Top pick hari ini — growth eksplosif + konversi tertinggi dari semua kategori."
+  },
+  {
+    cat: "Skincare Pria",
+    name: "JGLOW FOR MEN - Paket Brightening Fresh Water",
+    seller: "Integrasi Data Tokopedia",
+    price: "Rp80.900",
+    commission: "10%",
+    growth: "-37,9%",
+    growthUp: false,
+    conv: 36.61,
+    revenue: "Rp181,95 M / 30hr",
+    link: "https://www.kalodata.com/product",
+    usp: "Paket brightening untuk wajah pria, revenue 30 hari masih besar (Rp181,95 M) walau growth turun — kategori skincare pria lagi melambat secara keseluruhan bulan ini.",
+    flag: "Kategori skincare pria turun merata bulan ini — semua kompetitor sejenis juga melambat, bukan masalah produk spesifik."
+  }
+];
+
+const categories = [...new Set(data.map(d => d.cat))];
+const filtersEl = document.getElementById('filters');
+const catContainer = document.getElementById('catContainer');
+document.getElementById('statTotal').textContent = data.length;
+
+function renderChips(active){
+  filtersEl.innerHTML = '';
+  const all = document.createElement('div');
+  all.className = 'chip' + (active === 'all' ? ' active' : '');
+  all.textContent = 'Semua';
+  all.onclick = () => render('all');
+  filtersEl.appendChild(all);
+  categories.forEach(c => {
+    const chip = document.createElement('div');
+    chip.className = 'chip' + (active === c ? ' active' : '');
+    chip.textContent = c;
+    chip.onclick = () => render(c);
+    filtersEl.appendChild(chip);
+  });
+}
+
+function card(p, idx){
+  return `
+  <div class="card" onclick="openModal(${idx})">
+    <div class="card-top">
+      <p class="p-name">${p.name}</p>
+      <span class="tag ${p.growthUp ? 'up' : 'down'}">${p.growth}</span>
+    </div>
+    <div class="p-meta"><span>${p.seller}</span></div>
+    <div class="p-price">${p.price}</div>
+    <div class="p-row"><span>Komisi</span><span>${p.commission}</span></div>
+    <div class="p-row"><span>Pendapatan 30hr</span><span>${p.revenue}</span></div>
+    <div class="conv-bar-wrap">
+      <div class="conv-label"><span>Konversi Kreator</span><span>${p.conv}%</span></div>
+      <div class="conv-bar"><div class="conv-fill" style="width:${p.conv}%"></div></div>
+    </div>
+    ${p.flag ? `<div class="flag">${p.flag}</div>` : ''}
+  </div>`;
+}
+
+function render(active){
+  renderChips(active);
+  const cats = active === 'all' ? categories : [active];
+  catContainer.innerHTML = cats.map(c => {
+    const items = data.filter(d => d.cat === c);
+    return `
+    <div class="cat-section">
+      <div class="cat-title"><span class="dot"></span> ${c} <span class="count">(${items.length} produk)</span></div>
+      <div class="grid">
+        ${items.map(p => card(p, data.indexOf(p))).join('')}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openModal(idx){
+  const p = data[idx];
+  document.getElementById('modalBody').innerHTML = `
+    <span class="close" onclick="closeModal()">✕</span>
+    <div class="badge" style="margin-bottom:10px;">${p.cat}</div>
+    <h2>${p.name}</h2>
+    <div class="sub" style="color:var(--muted); font-size:13px;">${p.seller}</div>
+    <div class="modal-grid">
+      <div class="mrow"><div class="l">Harga</div><div class="v">${p.price}</div></div>
+      <div class="mrow"><div class="l">Komisi</div><div class="v">${p.commission}</div></div>
+      <div class="mrow"><div class="l">Growth 30hr</div><div class="v">${p.growth}</div></div>
+      <div class="mrow"><div class="l">Konversi Kreator</div><div class="v">${p.conv}%</div></div>
+    </div>
+    <div class="mrow" style="margin-bottom:14px;"><div class="l">Pendapatan 30 hari</div><div class="v">${p.revenue}</div></div>
+    <div class="usp-note"><b style="color:var(--text);">USP &amp; Insight:</b><br>${p.usp}</div>
+    ${p.flag ? `<div class="flag" style="display:block; margin-top:10px;">${p.flag}</div>` : ''}
+    <a class="linkbtn" href="${p.link}" target="_blank" rel="noopener">Buka di Kalodata →</a>
+  `;
+  document.getElementById('overlay').classList.add('show');
+}
+function closeModal(){ document.getElementById('overlay').classList.remove('show'); }
+document.getElementById('overlay').addEventListener('click', e => { if(e.target.id === 'overlay') closeModal(); });
+
+render('all');
+</script>
+
+</body>
+</html>
